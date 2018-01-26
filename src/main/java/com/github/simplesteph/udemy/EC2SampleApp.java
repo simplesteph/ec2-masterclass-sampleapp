@@ -28,8 +28,10 @@ public class EC2SampleApp {
         get("/", EC2SampleApp::hello);
         get("/cpu", EC2SampleApp::cpu);
         get("/ram", EC2SampleApp::ram);
+        get("/ram/info", EC2SampleApp::ramInfo);
+        get("/ram/clean", EC2SampleApp::ramClean);
         get("/health", EC2SampleApp::health);
-        get("/flip-health", EC2SampleApp::flipHealth);
+        get("/health/flip", EC2SampleApp::flipHealth);
         get("/details", EC2SampleApp::details);
     }
 
@@ -37,9 +39,9 @@ public class EC2SampleApp {
         StringBuilder sb = new StringBuilder();
 
         String myHostname = InetAddress.getLocalHost().getHostName();
-        sb.append("Hello World from: ").append(myHostname).append("<br/>");
+        sb.append("Hello World By: ").append(myHostname).append("<br/>");
         String sourceIP = request.ip();
-        sb.append("Received from: ").append(sourceIP).append("<br/>");
+        sb.append("Receive Request From: ").append(sourceIP).append("<br/>");
         return sb.toString();
     }
 
@@ -52,9 +54,22 @@ public class EC2SampleApp {
 
 
     private static String ram(Request request, Response response) {
-        String myBigString = new String(new char[10000000]);
-        myBigList.add(myBigString);
+        try {
+            String myBigString = new String(new char[10000000]);
+            myBigList.add(myBigString);
+            return ramInfo(request, response);
+        } catch (OutOfMemoryError e){
+            return "OutOfMemory Exception!";
+        }
+    }
+
+    private static String ramInfo(Request request, Response response) {
         return getRamInfo();
+    }
+
+    private static String ramClean(Request request, Response response) {
+        myBigList.clear();
+        return ramInfo(request, response);
     }
 
 
@@ -76,9 +91,9 @@ public class EC2SampleApp {
     private static String details(Request request, Response response) throws UnknownHostException {
         StringBuilder sb = new StringBuilder();
         String myHostname = InetAddress.getLocalHost().getHostName();
-        sb.append("Hello World from: ").append(myHostname).append("<br/>");
+        sb.append("Hello World By: ").append(myHostname).append("<br/>");
         String sourceIP = request.ip();
-        sb.append("Received from: ").append(sourceIP).append("<br/>").append("<br/>");
+        sb.append("Receive Request From: ").append(sourceIP).append("<br/>");
         sb.append("Request Headers are: ").append("<br/>");
         request.headers().forEach(header -> sb.append(header).append(": ").append(request.headers(header)).append("<br/>"));
         return sb.toString();
